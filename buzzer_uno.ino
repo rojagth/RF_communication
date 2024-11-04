@@ -2,21 +2,22 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
-#define CE_PIN 9
-#define CSN_PIN 10
-#define speakerOut 4 // Buzzer pin
+#define CE_PIN 7
+#define CSN_PIN 8
+#define speakerOut 10 // Buzzer pin
+#define buttonPin 2 // Button pin
 
 // Define note frequencies
 #define C 2100
 #define D 1870
 #define E 1670
-#define f 1580 // lowercase f
+#define f 1580
 #define G 1400
 #define R 0 // Rest note
 
 RF24 radio(CE_PIN, CSN_PIN);
 const byte address[6] = "00001";
-int receivedCommand = 0;
+int buttonState = 0;
 
 // MELODY and TIMING
 int melody[] = {
@@ -36,9 +37,12 @@ int pause = 1000; // Set length of pause between notes
 int rest_count = 100; // Length for rest
 int tone_ = 0;
 long duration = 0;
+int receivedCommand = 0;
 
 void setup() {
   pinMode(speakerOut, OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP); // Button with internal pull-up resistor
+  
   Serial.begin(9600);
   
   radio.begin();
@@ -66,9 +70,19 @@ void playTone() {
 }
 
 void loop() {
+  buttonState = digitalRead(buttonPin);
+  
+  if (buttonState == LOW) { // Button pressed
+    radio.stopListening();
+    int command = 1; // Signal to activate the servo on NodeMCU
+    radio.write(&command, sizeof(command));
+    delay(100);
+    radio.startListening();
+  }
+
   if (radio.available()) {
     radio.read(&receivedCommand, sizeof(receivedCommand));
-    if (receivedCommand == 1) { // Command to play the melody
+    if (receivedCommand == 2) { // Command to play the melody
       for (int i = 0; i < MAX_COUNT; i++) {
         tone_ = melody[i];
         duration = 50 * tempo; // Set up timing
