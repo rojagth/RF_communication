@@ -4,10 +4,9 @@
 
 #define CE_PIN 7
 #define CSN_PIN 8
-#define speakerOut 10 // Buzzer pin
-#define buttonPin 2 // Button pin
+#define speakerOut 10
+#define buttonPin 2
 
-// Define note frequencies
 #define C 2100
 #define D 1870
 #define E 1670
@@ -19,7 +18,6 @@ RF24 radio(CE_PIN, CSN_PIN);
 const byte address[6] = "00001";
 int buttonState = 0;
 
-// MELODY and TIMING
 int melody[] = {
   E, E, E, R,
   E, E, E, R,
@@ -31,17 +29,17 @@ int melody[] = {
   f, f, f, f, f, E, E, E, G, G, f, D, C, R
 };
 
-int MAX_COUNT = sizeof(melody) / sizeof(melody[0]); // Melody length
-long tempo = 10000; // Set overall tempo
-int pause = 1000; // Set length of pause between notes
-int rest_count = 100; // Length for rest
+int MAX_COUNT = sizeof(melody) / sizeof(melody[0]);
+long tempo = 10000;
+int pause = 1000;
+int rest_count = 100;
 int tone_ = 0;
 long duration = 0;
 int receivedCommand = 0;
 
 void setup() {
   pinMode(speakerOut, OUTPUT);
-  pinMode(buttonPin, INPUT_PULLUP); // Button with internal pull-up resistor
+  pinMode(buttonPin, INPUT_PULLUP);
   
   Serial.begin(9600);
   
@@ -54,7 +52,7 @@ void setup() {
 void playTone() {
   long elapsed_time = 0;
   
-  if (tone_ > 0) { // If not a rest beat
+  if (tone_ > 0) {
     while (elapsed_time < duration) {
       digitalWrite(speakerOut, HIGH);
       delayMicroseconds(tone_ / 2);
@@ -62,7 +60,7 @@ void playTone() {
       delayMicroseconds(tone_ / 2);
       elapsed_time += tone_;
     }
-  } else { // Rest beat
+  } else {
     for (int j = 0; j < rest_count; j++) {
       delayMicroseconds(duration); 
     }
@@ -72,9 +70,9 @@ void playTone() {
 void loop() {
   buttonState = digitalRead(buttonPin);
   
-  if (buttonState == LOW) { // Button pressed
+  if (buttonState == LOW) {
     radio.stopListening();
-    int command = 1; // Signal to activate the servo on NodeMCU
+    int command = 1;
     radio.write(&command, sizeof(command));
     delay(100);
     radio.startListening();
@@ -82,14 +80,14 @@ void loop() {
 
   if (radio.available()) {
     radio.read(&receivedCommand, sizeof(receivedCommand));
-    if (receivedCommand == 2) { // Command to play the melody
+    if (receivedCommand == 2) {
       for (int i = 0; i < MAX_COUNT; i++) {
         tone_ = melody[i];
-        duration = 50 * tempo; // Set up timing
+        duration = 50 * tempo;
         playTone();
-        delayMicroseconds(pause); // Pause between notes
+        delayMicroseconds(pause);
       }
-      noTone(speakerOut); // Ensure the buzzer is off after the song finishes
+      noTone(speakerOut);
     }
   }
 }
