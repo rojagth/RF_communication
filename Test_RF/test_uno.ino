@@ -5,7 +5,7 @@
 #include <LiquidCrystal_I2C.h>
 
 RF24 radio(9, 10);  // CE, CSN pins on Arduino
-const byte address[6] = "00001";  // Same address for communication
+const byte address[6] = "00001";
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 void setup() {
