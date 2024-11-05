@@ -16,8 +16,8 @@ int receivedCommand = 0;
 void setup() {
   Serial.begin(9600);
   
-  myServo.attach(servoPin); // Attach servo to designated pin
-  myServo.write(0); // Initial position
+  myServo.attach(servoPin);
+  myServo.write(0);
   
   radio.begin();
   radio.openReadingPipe(1, address);
@@ -28,14 +28,13 @@ void setup() {
 void loop() {
   if (radio.available()) {
     radio.read(&receivedCommand, sizeof(receivedCommand));
-    if (receivedCommand == 1) { // Command from Arduino to move the servo
-      myServo.write(90); // Move servo to 90 degrees
-      delay(1000); // Hold position for 1 second
-      myServo.write(0); // Return to original position
+    if (receivedCommand == 1) {
+      myServo.write(90);
+      delay(1000);
+      myServo.write(0);
 
-      // Send a command back to Arduino to play melody
       radio.stopListening();
-      int melodyCommand = 2; // Signal to play melody on Arduino
+      int melodyCommand = 2;
       radio.write(&melodyCommand, sizeof(melodyCommand));
       delay(100);
       radio.startListening();
