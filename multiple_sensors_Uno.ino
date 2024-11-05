@@ -24,7 +24,7 @@ void setup() {
 
 void loop() {
   if (radio.available()) {
-    char text[128] = ""; // Increase buffer size to accommodate more data
+    char text[128] = "";
     radio.read(&text, sizeof(text));
     
     Serial.print("Received: ");
@@ -32,9 +32,8 @@ void loop() {
     
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print(text); // Display sensor data on the first line
+    lcd.print(text);
     
-    // Check if button was pressed to control LED
     if (strcmp(text, "Button Pressed") == 0) {
       digitalWrite(ledPin, HIGH);
       lcd.setCursor(0, 1);
